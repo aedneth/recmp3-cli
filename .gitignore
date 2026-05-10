@@ -1,0 +1,27 @@
+node_modules/
+dist/
+
+# Secrets — never commit
+.env
+.env.local
+*.env
+
+# Audio files and temp recordings
+*.wav
+*.mp3
+*.m4a
+*.ogg
+*.flac
+/recordings/
+/tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Test coverage
+coverage/
