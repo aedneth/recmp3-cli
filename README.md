@@ -1,5 +1,9 @@
 # recmp3-cli
 
+[![CI](https://github.com/aedneth/recmp3-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/aedneth/recmp3-cli/actions/workflows/ci.yml)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![version](https://img.shields.io/badge/version-0.1.0-blue)](https://github.com/aedneth/recmp3-cli/releases)
+
 Record audio from any terminal, transcribe with Groq Whisper, get developer-ready output.
 
 ```
@@ -23,7 +27,7 @@ recmp3 prompt standup.wav --template claude-code | pbcopy
 ## Installation
 
 ```bash
-git clone https://github.com/eduardoborjas/recmp3-cli
+git clone https://github.com/aedneth/recmp3-cli
 cd recmp3-cli
 npm install
 npm run build
@@ -150,4 +154,9 @@ npm run test:watch    # Watch mode
 
 ## License
 
-MIT
+`recmp3-cli` is dual-licensed:
+
+- **[AGPL-3.0](LICENSE)** — free for personal use and open source projects
+- **[Commercial license](LICENSE-COMMERCIAL.md)** — required for proprietary/commercial use
+
+Contact **eduardoa.borjas@gmail.com** to purchase a commercial license.
