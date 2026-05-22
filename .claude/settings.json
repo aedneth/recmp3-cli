@@ -5,41 +5,7 @@
       "Bash(npm run dev)",
       "Bash(npm test)",
       "Bash(npm run lint)",
-      "Bash(git *)",
-      "Bash(bash .brain/scripts/*)",
-      "Bash(graphify *)"
-    ]
-  },
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash -c 'cd \"$(git rev-parse --show-toplevel 2>/dev/null)\" && bash .brain/scripts/assemble-context.sh 2>/dev/null || true'"
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash -c 'cd \"$(git rev-parse --show-toplevel 2>/dev/null)\" && bash .brain/scripts/log-compact.sh 2>/dev/null || true'"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash -c 'cd \"$(git rev-parse --show-toplevel 2>/dev/null)\" && bash .brain/scripts/log-session.sh 2>/dev/null || true'"
-          }
-        ]
-      }
+      "Bash(git *)"
     ]
   }
 }
