@@ -37,7 +37,7 @@ const RecorderUI: React.FC<RecorderProps> = ({ capture, captureOpts, outputPath,
   const segmentsRef = useRef<CaptureSegment[]>([]);
   const accumulatedMsRef = useRef(0);
   const segmentStartRef = useRef(Date.now());
-  const currentSegmentIndexRef = useRef(0);
+  const currentSegmentIndexRef = useRef(1);
   const isRecordingRef = useRef(true);
 
   // Live timer

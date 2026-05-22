@@ -111,6 +111,22 @@ recmp3 config path          # Print config file path
 recmp3 config set <k> <v>  # Set a config key
 ```
 
+## Use Cases
+
+### Transcribe Instagram reels, TikToks, or any system audio (`recwatch`)
+
+Capture the audio your speakers are playing — useful for transcribing reels, TikToks, YouTube clips, podcasts, or any video in your browser without re-recording with the mic. Linux + PulseAudio/PipeWire only; the source name below is the monitor of your default output sink (find yours via `recmp3 sources` or `pactl list short sources`).
+
+```bash
+alias recwatch='RECMP3_SOURCE="alsa_output.platform-avs_hdaudio.0.stereo-fallback.monitor" recmp3 record --transcribe -y'
+```
+
+1. Add the alias above to `~/.bashrc` and `source ~/.bashrc`.
+2. Open the Instagram reel / TikTok / video in your browser.
+3. Run `recwatch` — it starts recording your system audio output.
+4. Watch the video; the audio plays through your speakers and is captured.
+5. Press `s` to stop → auto-transcribes via Groq Whisper → transcript prints to terminal and is copied to your clipboard.
+
 ## Configuration
 
 Config file location:
