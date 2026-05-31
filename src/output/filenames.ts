@@ -1,4 +1,4 @@
-import { join } from 'path';
+import { join } from 'node:path';
 
 function formatDate(d: Date = new Date()): string {
   const pad = (n: number) => String(n).padStart(2, '0');

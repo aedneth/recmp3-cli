@@ -29,15 +29,21 @@
 - [x] CKIS documentation: `02-projects/recmp3-cli/_overview.md` created
 - [x] CKIS documentation: `04-resources/tools/pop-os-audio-mp3-ffmpeg.md` superseded
 
-## v0.2.0
+## v0.2.0 — agent-native retrofit
 
-- [ ] OS keychain storage via `keytar` (API keys currently env-var only)
-- [ ] `recmp3 config init` — store key in keychain instead of instructing user to set env var
-- [ ] Local Whisper backend (no upload) — add `LocalWhisperProvider` class
-- [ ] `recmp3 sources` — auto-detect physical mic vs `default` virtual device (mark physical as recommended)
-- [ ] Integration test: full record → transcribe → prompt pipeline with mock ffmpeg
-- [ ] `recmp3 record --watch` — continuous recording mode (auto-split by silence)
-- [ ] Publish to npm
+- [x] Agent-native layer: global `--json`/`--yes`/`--quiet`, stable JSON envelope, exit-code contract
+- [x] stdin/stdout composability (`transcribe -`, `prompt -`)
+- [x] `recmp3 manifest` (discoverable command/tool surface)
+- [x] `recmp3 mcp` (Model Context Protocol stdio server)
+- [x] Headless `recmp3 record --duration` / `--no-tui`
+- [x] OS keychain storage via `keytar` + `recmp3 config set-key`
+- [x] Non-interactive `recmp3 config init` (flag-driven)
+- [x] Local Whisper backend (`LocalWhisperProvider`, whisper.cpp, no upload)
+- [x] Expanded vitest + msw suite; CI test step + OS matrix; npm release workflow
+- [x] License fixed to AGPL-3.0-or-later in package.json
+- [ ] `recmp3 sources` — auto-detect physical mic vs `default` virtual device (moved to v0.3.0)
+- [ ] `recmp3 record --watch` — continuous recording mode (moved to v0.3.0)
+- [ ] Publish to npm (run the release workflow by tagging `v0.2.0`)
 
 ## Backlog / ideas
 

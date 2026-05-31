@@ -1,4 +1,4 @@
-import { AudioCaptureFactory } from './types.js';
+import type { AudioCaptureFactory } from './types.js';
 
 let _factory: AudioCaptureFactory | null = null;
 
@@ -17,7 +17,9 @@ export async function getAudioFactory(): Promise<AudioCaptureFactory> {
     const { WindowsDshowFactory } = await import('./windows-dshow.js');
     _factory = new WindowsDshowFactory();
   } else {
-    throw new Error(`Unsupported platform: ${platform}. Supported platforms: linux, darwin, win32.`);
+    throw new Error(
+      `Unsupported platform: ${platform}. Supported platforms: linux, darwin, win32.`
+    );
   }
 
   return _factory;

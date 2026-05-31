@@ -1,5 +1,5 @@
-import { execFile } from 'child_process';
-import { promisify } from 'util';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 
@@ -24,7 +24,10 @@ export async function findFfmpeg(): Promise<string> {
   }
 }
 
-export async function checkFfmpegVersion(): Promise<{ version: string; meets: boolean }> {
+export async function checkFfmpegVersion(): Promise<{
+  version: string;
+  meets: boolean;
+}> {
   try {
     const ffmpeg = await findFfmpeg();
     const { stdout, stderr } = await execFileAsync(ffmpeg, ['-version']);

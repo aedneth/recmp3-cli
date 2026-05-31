@@ -1,16 +1,20 @@
-import { execFile } from 'child_process';
-import { mkdir, readdir, stat } from 'fs/promises';
-import { basename, join } from 'path';
-import { promisify } from 'util';
+import { execFile } from 'node:child_process';
+import { mkdir, readdir, stat } from 'node:fs/promises';
+import { basename, join } from 'node:path';
+import { promisify } from 'node:util';
 import { findFfmpeg } from '../audio/ffmpeg.js';
-import { TranscriptionInput, TranscriptionProvider, TranscriptionResult } from './types.js';
+import type {
+  TranscriptionInput,
+  TranscriptionProvider,
+  TranscriptionResult,
+} from './types.js';
 
 const execFileAsync = promisify(execFile);
 
 export async function transcribeWithChunking(
   provider: TranscriptionProvider,
   input: TranscriptionInput,
-  chunkSeconds = 600,
+  chunkSeconds = 600
 ): Promise<TranscriptionResult> {
   const fileStat = await stat(input.audioPath);
 
@@ -21,8 +25,8 @@ export async function transcribeWithChunking(
 
   // File is too large — split into chunks and transcribe sequentially
   const tmpDir = join(
-    (await import('os')).tmpdir(),
-    `recmp3-chunks-${Date.now()}`,
+    (await import('node:os')).tmpdir(),
+    `recmp3-chunks-${Date.now()}`
   );
   await mkdir(tmpDir, { recursive: true });
 
@@ -30,11 +34,17 @@ export async function transcribeWithChunking(
   const chunkPattern = join(tmpDir, 'chunk-%04d.wav');
 
   await execFileAsync(ffmpeg, [
-    '-hide_banner', '-loglevel', 'error',
-    '-i', input.audioPath,
-    '-f', 'segment',
-    '-segment_time', String(chunkSeconds),
-    '-c', 'copy',
+    '-hide_banner',
+    '-loglevel',
+    'error',
+    '-i',
+    input.audioPath,
+    '-f',
+    'segment',
+    '-segment_time',
+    String(chunkSeconds),
+    '-c',
+    'copy',
     chunkPattern,
   ]);
 
@@ -50,7 +60,10 @@ export async function transcribeWithChunking(
 
   const results: TranscriptionResult[] = [];
   for (const chunkPath of files) {
-    const result = await provider.transcribe({ ...input, audioPath: chunkPath });
+    const result = await provider.transcribe({
+      ...input,
+      audioPath: chunkPath,
+    });
     results.push(result);
   }
 

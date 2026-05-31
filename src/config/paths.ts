@@ -1,5 +1,5 @@
-import { homedir } from 'os';
-import { join } from 'path';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 
 function xdgConfigHome(): string {
   return process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config');
@@ -13,7 +13,12 @@ function appPaths() {
   const platform = process.platform;
 
   if (platform === 'darwin') {
-    const appSupport = join(homedir(), 'Library', 'Application Support', 'recmp3');
+    const appSupport = join(
+      homedir(),
+      'Library',
+      'Application Support',
+      'recmp3'
+    );
     return {
       config: join(homedir(), 'Library', 'Preferences', 'recmp3'),
       data: appSupport,
@@ -23,7 +28,8 @@ function appPaths() {
   }
 
   if (platform === 'win32') {
-    const appData = process.env.APPDATA ?? join(homedir(), 'AppData', 'Roaming');
+    const appData =
+      process.env.APPDATA ?? join(homedir(), 'AppData', 'Roaming');
     const base = join(appData, 'recmp3');
     return {
       config: base,
