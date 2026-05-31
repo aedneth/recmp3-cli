@@ -1,9 +1,20 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, Text, useInput, useApp, render } from 'ink';
-import { AudioCapture, CaptureOptions, CaptureSegment } from '../audio/types.js';
+import { Box, Text, render, useApp, useInput } from 'ink';
+import type React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { concatSegments } from '../audio/concat.js';
+import type {
+  AudioCapture,
+  CaptureOptions,
+  CaptureSegment,
+} from '../audio/types.js';
 
-type RecStatus = 'recording' | 'paused' | 'saving' | 'done' | 'cancelled' | 'error';
+type RecStatus =
+  | 'recording'
+  | 'paused'
+  | 'saving'
+  | 'done'
+  | 'cancelled'
+  | 'error';
 
 interface RecorderState {
   status: RecStatus;
@@ -26,7 +37,12 @@ interface RecorderProps {
   onResult: (result: RecorderResult) => void;
 }
 
-const RecorderUI: React.FC<RecorderProps> = ({ capture, captureOpts, outputPath, onResult }) => {
+const RecorderUI: React.FC<RecorderProps> = ({
+  capture,
+  captureOpts,
+  outputPath,
+  onResult,
+}) => {
   const { exit } = useApp();
   const [status, setStatus] = useState<RecStatus>('recording');
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -44,24 +60,27 @@ const RecorderUI: React.FC<RecorderProps> = ({ capture, captureOpts, outputPath,
   useEffect(() => {
     const interval = setInterval(() => {
       if (isRecordingRef.current) {
-        setElapsedMs(accumulatedMsRef.current + (Date.now() - segmentStartRef.current));
+        setElapsedMs(
+          accumulatedMsRef.current + (Date.now() - segmentStartRef.current)
+        );
       }
     }, 100);
     return () => clearInterval(interval);
   }, []);
 
-  const stopCurrentSegment = useCallback(async (): Promise<CaptureSegment | null> => {
-    if (!isRecordingRef.current) return null;
-    try {
-      const segment = await capture.stop();
-      accumulatedMsRef.current += Date.now() - segmentStartRef.current;
-      isRecordingRef.current = false;
-      segmentsRef.current.push(segment);
-      return segment;
-    } catch {
-      return null;
-    }
-  }, [capture]);
+  const stopCurrentSegment =
+    useCallback(async (): Promise<CaptureSegment | null> => {
+      if (!isRecordingRef.current) return null;
+      try {
+        const segment = await capture.stop();
+        accumulatedMsRef.current += Date.now() - segmentStartRef.current;
+        isRecordingRef.current = false;
+        segmentsRef.current.push(segment);
+        return segment;
+      } catch {
+        return null;
+      }
+    }, [capture]);
 
   const startNewSegment = useCallback(async () => {
     currentSegmentIndexRef.current += 1;
@@ -101,7 +120,7 @@ const RecorderUI: React.FC<RecorderProps> = ({ capture, captureOpts, outputPath,
         segmentsRef.current,
         outputPath,
         captureOpts.tmpDir,
-        'wav',
+        'wav'
       );
 
       setStatusMessage('');
@@ -120,7 +139,15 @@ const RecorderUI: React.FC<RecorderProps> = ({ capture, captureOpts, outputPath,
       setStatusMessage(err instanceof Error ? err.message : String(err));
       setTimeout(() => exit(), 2000);
     }
-  }, [busy, status, stopCurrentSegment, outputPath, captureOpts.tmpDir, onResult, exit]);
+  }, [
+    busy,
+    status,
+    stopCurrentSegment,
+    outputPath,
+    captureOpts.tmpDir,
+    onResult,
+    exit,
+  ]);
 
   const handleCancel = useCallback(async () => {
     if (busy) return;
@@ -132,14 +159,23 @@ const RecorderUI: React.FC<RecorderProps> = ({ capture, captureOpts, outputPath,
   }, [busy, capture, onResult, exit]);
 
   useInput((input, key) => {
-    if (key.ctrl && input === 'c') { handleCancel(); return; }
-    if (input === 'c' || key.escape) { handleCancel(); return; }
+    if (key.ctrl && input === 'c') {
+      handleCancel();
+      return;
+    }
+    if (input === 'c' || key.escape) {
+      handleCancel();
+      return;
+    }
     if (input === 'p' || input === ' ') {
       if (status === 'recording') handlePause();
       else if (status === 'paused') handleResume();
       return;
     }
-    if (input === 's' || key.return) { handleSave(); return; }
+    if (input === 's' || key.return) {
+      handleSave();
+      return;
+    }
   });
 
   const elapsed = Math.floor(elapsedMs / 1000);
@@ -169,10 +205,21 @@ const RecorderUI: React.FC<RecorderProps> = ({ capture, captureOpts, outputPath,
   const showControls = status === 'recording' || status === 'paused';
 
   return (
-    <Box flexDirection="column" borderStyle="round" paddingX={2} paddingY={1} width={44}>
+    <Box
+      flexDirection="column"
+      borderStyle="round"
+      paddingX={2}
+      paddingY={1}
+      width={44}
+    >
       <Box justifyContent="center">
-        <Text bold color={statusColors[status] as 'red' | 'yellow' | 'cyan' | 'green' | 'gray'}>
-          {statusLabels[status]}  {timeStr}
+        <Text
+          bold
+          color={
+            statusColors[status] as 'red' | 'yellow' | 'cyan' | 'green' | 'gray'
+          }
+        >
+          {statusLabels[status]} {timeStr}
         </Text>
       </Box>
       {statusMessage ? (
@@ -182,7 +229,8 @@ const RecorderUI: React.FC<RecorderProps> = ({ capture, captureOpts, outputPath,
       ) : showControls ? (
         <Box justifyContent="center" marginTop={1}>
           <Text color="gray">
-            {status === 'recording' ? '[p] pause' : '[p] resume'}  [s] save  [c] cancel
+            {status === 'recording' ? '[p] pause' : '[p] resume'} [s] save [c]
+            cancel
           </Text>
         </Box>
       ) : null}
@@ -193,7 +241,7 @@ const RecorderUI: React.FC<RecorderProps> = ({ capture, captureOpts, outputPath,
 export async function runRecorderTUI(
   capture: AudioCapture,
   captureOpts: Omit<CaptureOptions, 'outputPath'> & { tmpDir: string },
-  outputPath: string,
+  outputPath: string
 ): Promise<RecorderResult> {
   return new Promise((resolve) => {
     let result: RecorderResult | null = null;
@@ -201,11 +249,16 @@ export async function runRecorderTUI(
     const { waitUntilExit } = render(
       <RecorderUI
         capture={capture}
-        captureOpts={{ ...captureOpts, outputPath: `${captureOpts.tmpDir}/segment-0001.wav` }}
+        captureOpts={{
+          ...captureOpts,
+          outputPath: `${captureOpts.tmpDir}/segment-0001.wav`,
+        }}
         outputPath={outputPath}
-        onResult={(r) => { result = r; }}
+        onResult={(r) => {
+          result = r;
+        }}
       />,
-      { exitOnCtrlC: false },
+      { exitOnCtrlC: false }
     );
 
     waitUntilExit().then(() => {

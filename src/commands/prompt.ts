@@ -1,13 +1,19 @@
-import { existsSync, readFileSync } from 'fs';
-import { writeFile } from 'fs/promises';
-import { basename } from 'path';
+import { existsSync, readFileSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
+import { basename } from 'node:path';
 import pc from 'picocolors';
+import type { AgentContext } from '../agent/context.js';
+import { readStdinText } from '../agent/stdin.js';
+import { InputError } from '../errors.js';
 import { copyToClipboard } from '../output/clipboard.js';
 
 const TEMPLATES: Record<string, (text: string, name?: string) => string> = {
   raw: (text) => text,
 
-  'claude-code': (text, name) => `# Claude Code Prompt${name ? ` — ${name}` : ''}
+  'claude-code': (
+    text,
+    name
+  ) => `# Claude Code Prompt${name ? ` — ${name}` : ''}
 
 ## Objective
 ${text}
@@ -37,7 +43,10 @@ ${text}
 [Note any architectural decisions made during implementation]
 `,
 
-  prd: (text, name) => `# Product Requirements Document${name ? ` — ${name}` : ''}
+  prd: (
+    text,
+    name
+  ) => `# Product Requirements Document${name ? ` — ${name}` : ''}
 
 **Created:** ${new Date().toISOString().split('T')[0]}
 **Status:** Draft
@@ -144,7 +153,9 @@ export function listTemplates(): void {
   for (const name of Object.keys(TEMPLATES)) {
     console.log(`  ${pc.cyan(name)}`);
   }
-  console.log(`\n  Usage: recmp3 prompt <transcript.txt> --template claude-code\n`);
+  console.log(
+    '\n  Usage: recmp3 prompt <transcript.txt> --template claude-code\n'
+  );
 }
 
 export interface PromptOptions {
@@ -154,39 +165,52 @@ export interface PromptOptions {
   listTemplates?: boolean;
 }
 
-export async function runPrompt(transcriptFile: string, opts: PromptOptions = {}): Promise<void> {
+export async function runPrompt(
+  transcriptFile: string,
+  opts: PromptOptions,
+  ctx: AgentContext
+): Promise<void> {
   if (opts.listTemplates) {
     listTemplates();
     return;
-  }
-
-  if (!existsSync(transcriptFile)) {
-    console.error(`${pc.red('✗')} File not found: ${transcriptFile}`);
-    process.exit(1);
   }
 
   const templateName = opts.template ?? 'claude-code';
   const templateFn = TEMPLATES[templateName];
 
   if (!templateFn) {
-    console.error(`${pc.red('✗')} Unknown template: "${templateName}"`);
-    console.error(`  Available: ${Object.keys(TEMPLATES).join(', ')}`);
-    process.exit(1);
+    throw new InputError(
+      `Unknown template: "${templateName}". Available: ${Object.keys(TEMPLATES).join(', ')}`
+    );
   }
 
-  const text = readFileSync(transcriptFile, 'utf-8').trim();
-  const name = basename(transcriptFile, '.txt');
+  // "-" reads transcript text from stdin (composes with `transcribe ... | prompt -`).
+  let text: string;
+  let name: string | undefined;
+  if (transcriptFile === '-') {
+    text = (await readStdinText()).trim();
+    if (!text) throw new InputError('No text received on stdin.');
+  } else {
+    if (!existsSync(transcriptFile)) {
+      throw new InputError(`File not found: ${transcriptFile}`);
+    }
+    text = readFileSync(transcriptFile, 'utf-8').trim();
+    name = basename(transcriptFile, '.txt');
+  }
+
   const output = templateFn(text, name);
 
   if (opts.out) {
     await writeFile(opts.out, output, 'utf-8');
-    console.error(`${pc.green('✓')} Written to: ${opts.out}`);
+    ctx.note(`${pc.green('✓')} Written to: ${opts.out}\n`);
   }
-
-  process.stdout.write(output);
 
   if (opts.copy) {
     const copied = await copyToClipboard(output);
-    if (copied) console.error(pc.gray('  Copied to clipboard.'));
+    if (copied) ctx.note(pc.gray('  Copied to clipboard.\n'));
   }
+
+  ctx.ok('prompt', { template: templateName, output }, () =>
+    process.stdout.write(output)
+  );
 }

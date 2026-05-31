@@ -1,10 +1,16 @@
-import { spawn, ChildProcess } from 'child_process';
-import { stat } from 'fs/promises';
-import { AudioCapture, AudioCaptureFactory, AudioSource, CaptureOptions, CaptureSegment } from './types.js';
+import { type ChildProcess, spawn } from 'node:child_process';
+import { execFile } from 'node:child_process';
+import { stat } from 'node:fs/promises';
+import { promisify } from 'node:util';
 import { AudioCaptureError } from '../errors.js';
 import { findFfmpeg } from './ffmpeg.js';
-import { execFile } from 'child_process';
-import { promisify } from 'util';
+import type {
+  AudioCapture,
+  AudioCaptureFactory,
+  AudioSource,
+  CaptureOptions,
+  CaptureSegment,
+} from './types.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -18,12 +24,18 @@ export class LinuxPulseCapture implements AudioCapture {
     const ffmpeg = await findFfmpeg();
     const args = [
       '-hide_banner',
-      '-loglevel', 'error',
-      '-f', 'pulse',
-      '-i', opts.source,
-      '-ac', String(opts.channels),
-      '-ar', String(opts.sampleRate),
-      '-c:a', 'pcm_s16le',
+      '-loglevel',
+      'error',
+      '-f',
+      'pulse',
+      '-i',
+      opts.source,
+      '-ac',
+      String(opts.channels),
+      '-ar',
+      String(opts.sampleRate),
+      '-c:a',
+      'pcm_s16le',
       '-y',
       opts.outputPath,
     ];
@@ -64,13 +76,19 @@ export class LinuxPulseCapture implements AudioCapture {
       setTimeout(() => {
         if (!proc.pid) {
           clearTimeout(timer);
-          reject(new AudioCaptureError(`ffmpeg failed to start. Check audio source: "${opts.source}"`));
+          reject(
+            new AudioCaptureError(
+              `ffmpeg failed to start. Check audio source: "${opts.source}"`
+            )
+          );
         }
       }, 200);
     });
 
     if (!proc.pid) {
-      throw new AudioCaptureError(`ffmpeg failed to start. Run 'recmp3 sources' to list available audio sources.`);
+      throw new AudioCaptureError(
+        `ffmpeg failed to start. Run 'recmp3 sources' to list available audio sources.`
+      );
     }
   }
 
@@ -146,7 +164,11 @@ export class LinuxPulseCaptureFactory implements AudioCaptureFactory {
 
   async listSources(): Promise<AudioSource[]> {
     try {
-      const { stdout } = await execFileAsync('pactl', ['list', 'sources', 'short']);
+      const { stdout } = await execFileAsync('pactl', [
+        'list',
+        'sources',
+        'short',
+      ]);
       const sources: AudioSource[] = [];
 
       for (const line of stdout.trim().split('\n')) {
@@ -166,7 +188,11 @@ export class LinuxPulseCaptureFactory implements AudioCaptureFactory {
       // Add 'default' as the first option
       const hasDefault = sources.some((s) => s.id === 'default');
       if (!hasDefault) {
-        sources.unshift({ id: 'default', label: 'default (system default)', isDefault: true });
+        sources.unshift({
+          id: 'default',
+          label: 'default (system default)',
+          isDefault: true,
+        });
       }
 
       return sources;
@@ -174,17 +200,26 @@ export class LinuxPulseCaptureFactory implements AudioCaptureFactory {
       // pactl not available — fall back to ffmpeg pulse enumeration
       try {
         const ffmpeg = await findFfmpeg();
-        const { stderr } = await execFileAsync(ffmpeg, ['-sources', 'pulse', '-hide_banner']);
-        const sources: AudioSource[] = [{ id: 'default', label: 'default (system default)', isDefault: true }];
+        const { stderr } = await execFileAsync(ffmpeg, [
+          '-sources',
+          'pulse',
+          '-hide_banner',
+        ]);
+        const sources: AudioSource[] = [
+          { id: 'default', label: 'default (system default)', isDefault: true },
+        ];
 
         for (const line of stderr.split('\n')) {
           const match = line.match(/^\s+(\S+)\s/);
-          if (match) sources.push({ id: match[1], label: match[1], isDefault: false });
+          if (match)
+            sources.push({ id: match[1], label: match[1], isDefault: false });
         }
 
         return sources;
       } catch {
-        return [{ id: 'default', label: 'default (system default)', isDefault: true }];
+        return [
+          { id: 'default', label: 'default (system default)', isDefault: true },
+        ];
       }
     }
   }

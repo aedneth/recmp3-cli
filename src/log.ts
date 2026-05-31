@@ -9,12 +9,16 @@ export function initLogger(opts: { debug?: boolean; verbose?: boolean }) {
 export const log = {
   debug(msg: string, ...args: unknown[]) {
     if (debugEnabled) {
-      process.stderr.write(`[debug] ${msg} ${args.length ? JSON.stringify(args) : ''}\n`);
+      process.stderr.write(
+        `[debug] ${msg} ${args.length ? JSON.stringify(args) : ''}\n`
+      );
     }
   },
   info(msg: string, ...args: unknown[]) {
     if (verboseEnabled) {
-      process.stderr.write(`[info]  ${msg} ${args.length ? JSON.stringify(args) : ''}\n`);
+      process.stderr.write(
+        `[info]  ${msg} ${args.length ? JSON.stringify(args) : ''}\n`
+      );
     }
   },
   warn(msg: string) {

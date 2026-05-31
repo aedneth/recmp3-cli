@@ -1,15 +1,15 @@
-import { writeFile } from 'fs/promises';
-import { TranscriptionResult } from '../transcription/types.js';
+import { writeFile } from 'node:fs/promises';
+import type { TranscriptionResult } from '../transcription/types.js';
 import { transcriptPath } from './filenames.js';
 
 export async function writeTranscriptFiles(
   audioPath: string,
-  result: TranscriptionResult,
+  result: TranscriptionResult
 ): Promise<{ txtPath: string; jsonPath: string }> {
   const txtPath = transcriptPath(audioPath, 'txt');
   const jsonPath = transcriptPath(audioPath, 'json');
 
-  await writeFile(txtPath, result.text + '\n', 'utf-8');
+  await writeFile(txtPath, `${result.text}\n`, 'utf-8');
 
   const meta = {
     text: result.text,
@@ -21,7 +21,7 @@ export async function writeTranscriptFiles(
     audioFile: audioPath,
     segments: result.segments,
   };
-  await writeFile(jsonPath, JSON.stringify(meta, null, 2) + '\n', 'utf-8');
+  await writeFile(jsonPath, `${JSON.stringify(meta, null, 2)}\n`, 'utf-8');
 
   return { txtPath, jsonPath };
 }

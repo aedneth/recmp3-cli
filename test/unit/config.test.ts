@@ -44,6 +44,14 @@ describe('config env overrides', () => {
     expect(cfg.audio.source).toBe('alsa_input.test-device');
   });
 
+  it('RECMP3_WHISPER_BIN and RECMP3_WHISPER_MODEL populate provider.local', async () => {
+    process.env.RECMP3_WHISPER_BIN = '/usr/local/bin/whisper-cli';
+    process.env.RECMP3_WHISPER_MODEL = '/models/ggml-base.en.bin';
+    const cfg = await loadConfig();
+    expect(cfg.provider.local?.binPath).toBe('/usr/local/bin/whisper-cli');
+    expect(cfg.provider.local?.modelPath).toBe('/models/ggml-base.en.bin');
+  });
+
   it('loads defaults when no env vars set', async () => {
     // Remove all recmp3 vars
     delete process.env.RECMP3_PROVIDER;

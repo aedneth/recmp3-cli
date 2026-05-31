@@ -2,6 +2,32 @@
 
 All notable changes are documented here. This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] — 2026-05-31
+
+### Added
+
+- **Agent-native layer** — every command works fully non-interactively for AI agents and scripts:
+  - Global `--json` flag (and `RECMP3_JSON=1`) emits a stable, versioned JSON envelope on stdout.
+  - Global `--yes` (and `RECMP3_YES=1`) skips all prompts; global `--quiet` and `--no-color`.
+  - Documented, deterministic POSIX exit-code contract (0/1/2/3/4/5/6/7/130).
+  - `stdin`/`stdout` composability: `transcribe -` reads audio from stdin, `prompt -` reads text from stdin.
+- `recmp3 manifest` — discoverable command/tool manifest (`--json` for machine form).
+- `recmp3 mcp` — Model Context Protocol server over stdio exposing `recmp3_*` tools.
+- Headless recording — `recmp3 record --duration <s>` / `--no-tui` capture without the Ink TUI.
+- Non-interactive `recmp3 config init` (flag-driven) and new `recmp3 config set-key` (OS keychain).
+- **Local Whisper backend** — `--provider local-whisper` runs a whisper.cpp binary with no upload.
+- **OS keychain key storage** via `keytar` (env vars still take precedence; graceful fallback).
+- Expanded vitest + msw test suite; CI now runs tests on an OS matrix (Linux/macOS/Windows × Node 20/22).
+- `release.yml` workflow to publish to npm on `v*` tags; `docs/AGENTS.md` agent-integration guide.
+
+### Fixed
+
+- `package.json` license corrected from `MIT` to `AGPL-3.0-or-later` to match the LICENSE file.
+
+### Changed
+
+- `getApiKey` and provider construction are now async (keychain-aware). Internal only; CLI behavior unchanged.
+
 ## [0.1.0] — 2026-05-10
 
 ### Added

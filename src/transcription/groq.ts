@@ -1,8 +1,8 @@
-import { readFile } from 'fs/promises';
-import { basename, extname } from 'path';
+import { readFile } from 'node:fs/promises';
+import { basename, extname } from 'node:path';
 import { NetworkError, TranscriptionError } from '../errors.js';
 import { log } from '../log.js';
-import {
+import type {
   ProviderConfig,
   TranscriptionInput,
   TranscriptionProvider,
@@ -11,7 +11,18 @@ import {
 
 const GROQ_BASE_URL = 'https://api.groq.com/openai/v1';
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
-const SUPPORTED_FORMATS = ['flac', 'm4a', 'mp3', 'mp4', 'mpeg', 'mpga', 'oga', 'ogg', 'wav', 'webm'] as const;
+const SUPPORTED_FORMATS = [
+  'flac',
+  'm4a',
+  'mp3',
+  'mp4',
+  'mpeg',
+  'mpga',
+  'oga',
+  'ogg',
+  'wav',
+  'webm',
+] as const;
 
 function getMimeType(filePath: string): string {
   const ext = extname(filePath).toLowerCase().slice(1);
@@ -42,10 +53,18 @@ export class GroqProvider implements TranscriptionProvider {
   }
 
   async transcribe(input: TranscriptionInput): Promise<TranscriptionResult> {
-    const { audioPath, language, prompt, responseFormat = 'verbose_json', signal } = input;
+    const {
+      audioPath,
+      language,
+      prompt,
+      responseFormat = 'verbose_json',
+      signal,
+    } = input;
     const t0 = Date.now();
 
-    log.info(`Transcribing with Groq (${this.config.model}): ${basename(audioPath)}`);
+    log.info(
+      `Transcribing with Groq (${this.config.model}): ${basename(audioPath)}`
+    );
 
     const audioBuffer = await readFile(audioPath);
     const mimeType = getMimeType(audioPath);
@@ -76,9 +95,13 @@ export class GroqProvider implements TranscriptionProvider {
     } catch (err: unknown) {
       clearTimeout(timeout);
       if (err instanceof Error && err.name === 'AbortError') {
-        throw new TranscriptionError('Transcription timed out after ' + Math.round(this.timeoutMs / 1000) + 's.');
+        throw new TranscriptionError(
+          `Transcription timed out after ${Math.round(this.timeoutMs / 1000)}s.`
+        );
       }
-      throw new NetworkError(`Network error connecting to Groq: ${err instanceof Error ? err.message : String(err)}`);
+      throw new NetworkError(
+        `Network error connecting to Groq: ${err instanceof Error ? err.message : String(err)}`
+      );
     } finally {
       clearTimeout(timeout);
     }
@@ -87,11 +110,11 @@ export class GroqProvider implements TranscriptionProvider {
       const body = await response.text().catch(() => '');
       throw new TranscriptionError(
         `Groq API error ${response.status}: ${body || response.statusText}`,
-        response.status,
+        response.status
       );
     }
 
-    const raw = await response.json() as Record<string, unknown>;
+    const raw = (await response.json()) as Record<string, unknown>;
     const text = typeof raw === 'string' ? raw : ((raw.text as string) ?? '');
     const latencyMs = Date.now() - t0;
 
@@ -101,7 +124,11 @@ export class GroqProvider implements TranscriptionProvider {
       text: text.trim(),
       language: raw.language as string | undefined,
       durationSec: raw.duration as number | undefined,
-      segments: (raw.segments as Array<{ start: number; end: number; text: string }> | undefined)?.map((s) => ({
+      segments: (
+        raw.segments as
+          | Array<{ start: number; end: number; text: string }>
+          | undefined
+      )?.map((s) => ({
         startSec: s.start,
         endSec: s.end,
         text: s.text,
@@ -125,7 +152,10 @@ export class GroqProvider implements TranscriptionProvider {
       }
       return { ok: true, latencyMs: Date.now() - t0 };
     } catch (err: unknown) {
-      return { ok: false, error: err instanceof Error ? err.message : String(err) };
+      return {
+        ok: false,
+        error: err instanceof Error ? err.message : String(err),
+      };
     }
   }
 }

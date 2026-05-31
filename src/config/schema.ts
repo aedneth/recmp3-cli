@@ -4,7 +4,7 @@ export const RecmpConfigSchema = z.object({
   version: z.literal(1).default(1),
   provider: z
     .object({
-      default: z.enum(['groq', 'openai']).default('groq'),
+      default: z.enum(['groq', 'openai', 'local-whisper']).default('groq'),
       groq: z
         .object({
           model: z.string().default('whisper-large-v3-turbo'),
@@ -17,6 +17,13 @@ export const RecmpConfigSchema = z.object({
           model: z.string().default('whisper-1'),
           baseUrl: z.string().optional(),
           timeoutMs: z.number().optional(),
+        })
+        .optional(),
+      local: z
+        .object({
+          binPath: z.string().optional(),
+          modelPath: z.string().optional(),
+          language: z.string().optional(),
         })
         .optional(),
     })

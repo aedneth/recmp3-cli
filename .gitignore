@@ -28,3 +28,6 @@ coverage/
 
 # Per-project CKIS second brain (personal tooling — not part of the public repo)
 .brain/
+
+# Private architecture planning — strip before public merges
+docs/planning/

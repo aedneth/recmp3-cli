@@ -6,7 +6,7 @@ Rules for AI agents (Claude Code, Codex, Gemini CLI, etc.) working in this repo.
 
 - **ESM only.** `"type": "module"` in package.json. All imports must use `.js` extensions. No CommonJS `require()`.
 - **Node.js 20+.** Use native `fetch`, `FormData`, `Blob`, `AbortSignal.timeout()` — no polyfills.
-- **No new runtime dependencies** without explicit approval. Current dep count is intentionally minimal.
+- **No new runtime dependencies** without explicit approval. Current dep count is intentionally minimal. (`@modelcontextprotocol/sdk` was approved for the MCP server; `keytar` is an optional, lazily-loaded native dep.)
 - **tsup is the bundler.** Do not introduce webpack, rollup, esbuild directly, or vite.
 - **No `any`.** TypeScript strict mode is on. Use `unknown` and narrow — do not cast to `any`.
 
@@ -20,7 +20,14 @@ Platform audio backends live in `src/audio/`. `getAudioFactory()` in `src/audio/
 
 ## Error handling
 
-All user-facing errors go through the typed error classes in `src/errors.ts`. Each class has a specific `exitCode`. Don't `process.exit()` directly from business logic — throw the appropriate error class and let `handleError()` in `src/index.ts` catch it.
+All user-facing errors go through the typed error classes in `src/errors.ts`. Each class has a specific `exitCode` (see the exported `ExitCode` map). Don't `process.exit()` directly from business logic — throw the appropriate error class and let `handleError()` in `src/index.ts` catch it.
+
+## Agent-native layer (do not break)
+
+- Every command receives an `AgentContext` (`src/agent/context.ts`) and emits results via `ctx.ok(command, payload, humanRender?)` — never write results straight to stdout. Human-only chatter goes through `ctx.note()` (stderr, suppressed by `--quiet`).
+- The JSON envelope shape in `src/agent/output.ts` and per-command `data` payloads are a public contract. Bump `SCHEMA_VERSION` on any breaking change.
+- `src/agent/manifest.ts` is the single source of truth for the command/tool surface; the MCP server (`src/agent/mcp.ts`) derives tools from it. Keep them in sync.
+- Local providers must not trigger upload consent — gate `ensureUploadConsent()` behind `providerUploads()`.
 
 ## Security rules
 
