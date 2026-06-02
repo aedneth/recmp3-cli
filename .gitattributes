@@ -1,0 +1,17 @@
+# Enforce LF line endings for all text files on all platforms.
+# Prevents Biome from failing the format check on Windows (CRLF vs LF diff).
+* text=auto eol=lf
+
+# Binary files — never touch line endings
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.flac binary
+*.m4a binary
+*.webm binary
+*.node binary

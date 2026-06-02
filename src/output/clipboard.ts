@@ -7,8 +7,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     return true;
   } catch (err: unknown) {
     log.info(
-      'Clipboard copy failed (headless or missing xclip/wl-copy): ' +
-      (err instanceof Error ? err.message : String(err)),
+      `Clipboard copy failed (headless or missing xclip/wl-copy): ${err instanceof Error ? err.message : String(err)}`
     );
     return false;
   }

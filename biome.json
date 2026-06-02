@@ -9,13 +9,17 @@
       "recommended": true,
       "suspicious": {
         "noExplicitAny": "warn"
+      },
+      "style": {
+        "noNonNullAssertion": "warn"
       }
     }
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
-    "indentWidth": 2
+    "indentWidth": 2,
+    "lineEnding": "lf"
   },
   "javascript": {
     "formatter": {

@@ -2,9 +2,11 @@
 
 [![CI](https://github.com/aedneth/recmp3-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/aedneth/recmp3-cli/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![version](https://img.shields.io/badge/version-0.1.0-blue)](https://github.com/aedneth/recmp3-cli/releases)
+[![version](https://img.shields.io/badge/version-0.2.0-blue)](https://github.com/aedneth/recmp3-cli/releases)
 
 Record audio from any terminal, transcribe with Groq Whisper, get developer-ready output.
+A first-class tool for **both humans and terminal AI agents** — every interactive flow has a
+fully non-interactive, JSON-emitting equivalent, plus a built-in MCP server.
 
 ```
 recmp3 record --name "my standup"
@@ -17,6 +19,8 @@ recmp3 prompt standup.wav --template claude-code | pbcopy
 - **Transcribes** via Groq `whisper-large-v3-turbo` (or OpenAI Whisper)
 - **Formats** output with 7 developer templates: `claude-code`, `prd`, `bug`, `meeting-notes`, `todo`, `commit-message`, `raw`
 - **Cross-platform:** Linux (PulseAudio/PipeWire), macOS (AVFoundation), Windows (DirectShow)
+- **Agent-native:** global `--json` envelopes, `--yes`, deterministic exit codes, stdin/stdout piping, a discoverable `manifest`, and an MCP server — see [Agent & scripting use](#agent--scripting-use)
+- **Local option:** `--provider local-whisper` transcribes on-device via whisper.cpp (no upload)
 
 ## Requirements
 
@@ -105,10 +109,52 @@ Run 8 system checks: Node version, platform support, ffmpeg version, audio backe
 ### `recmp3 config`
 
 ```bash
-recmp3 config init          # Interactive setup wizard
+recmp3 config init          # Setup (interactive, or flag-driven: --provider/--lang/--outdir/--key)
 recmp3 config show          # Display current config (API key redacted)
 recmp3 config path          # Print config file path
-recmp3 config set <k> <v>  # Set a config key
+recmp3 config set <k> <v>   # Set a config key
+recmp3 config set-key groq --key gsk_...   # Store an API key in the OS keychain
+```
+
+## Agent & scripting use
+
+Every command is usable by AI agents (Claude Code, Codex, Gemini CLI, …) and shell scripts
+with no TTY and no prompts. See [`docs/AGENTS.md`](docs/AGENTS.md) for the full reference.
+
+```bash
+# Stable JSON envelope on stdout; chatter on stderr
+recmp3 transcribe meeting.wav --json --yes | jq -r .data.text
+
+# Compose via pipes: transcribe → template
+recmp3 transcribe meeting.wav --json --yes | jq -r .data.text | recmp3 prompt - --template prd
+
+# Headless recording (no Ink TUI)
+recmp3 record --duration 5 --json --yes
+
+# Discover the command/tool surface
+recmp3 manifest --json
+```
+
+**Exit codes:** `0` success · `1` unknown · `2` config · `3` audio/ffmpeg · `4` transcription ·
+`5` network · `6` local-whisper · `7` input · `130` user abort.
+
+### MCP server
+
+`recmp3` ships a Model Context Protocol server over stdio. Register it with any MCP client:
+
+```jsonc
+{ "mcpServers": { "recmp3": { "command": "recmp3", "args": ["mcp"] } } }
+```
+
+Tools: `recmp3_transcribe`, `recmp3_prompt`, `recmp3_sources`, `recmp3_doctor`,
+`recmp3_config_show`, `recmp3_record`, `recmp3_manifest`.
+
+### Local, no-upload transcription
+
+```bash
+export RECMP3_WHISPER_BIN=/usr/local/bin/whisper-cli   # whisper.cpp binary
+export RECMP3_WHISPER_MODEL=/models/ggml-base.en.bin
+recmp3 transcribe clip.wav --provider local-whisper --json
 ```
 
 ## Use Cases
@@ -146,14 +192,20 @@ Environment variables override config file values:
 | `RECMP3_FFMPEG_PATH` | Path to ffmpeg binary |
 | `RECMP3_OUTDIR` | Default recordings output directory |
 | `RECMP3_LANG` | Default language hint (e.g. `es`, `en`) |
+| `RECMP3_WHISPER_BIN` | Path to a whisper.cpp binary (for `local-whisper`) |
+| `RECMP3_WHISPER_MODEL` | Path to a GGML model file (for `local-whisper`) |
+| `RECMP3_JSON` | `1` to always emit JSON envelopes |
+| `RECMP3_YES` | `1` to skip all prompts |
+| `RECMP3_QUIET` | `1` to suppress stderr chatter |
 | `RECMP3_SKIP_CONSENT` | `1` to skip upload consent prompt |
 
 ## Providers
 
-| Provider | Default model | Max file size |
-|---|---|---|
-| Groq | `whisper-large-v3-turbo` | 25 MB |
-| OpenAI | `whisper-1` | 25 MB |
+| Provider | Default model | Max file size | Upload |
+|---|---|---|---|
+| Groq | `whisper-large-v3-turbo` | 25 MB | yes |
+| OpenAI | `whisper-1` | 25 MB | yes |
+| local-whisper | whisper.cpp GGML model | unlimited | **no (on-device)** |
 
 Audio is captured as WAV 16kHz mono (~1 MB/min), so the 25 MB limit covers ~25 minutes per recording. Longer recordings are chunked automatically.
 
