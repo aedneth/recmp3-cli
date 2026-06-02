@@ -2,7 +2,7 @@
 
 All notable changes are documented here. This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/).
 
-## [0.2.0] — 2026-05-31
+## [0.2.0] — 2026-06-02
 
 ### Added
 
@@ -23,6 +23,7 @@ All notable changes are documented here. This project follows [Keep a Changelog]
 ### Fixed
 
 - `package.json` license corrected from `MIT` to `AGPL-3.0-or-later` to match the LICENSE file.
+- Added `.gitattributes` (`* text=auto eol=lf`) and `biome.json` `lineEnding: lf` to fix Windows CI (CRLF/LF mismatch caused Biome format check to fail on all Windows matrix jobs).
 
 ### Changed
 

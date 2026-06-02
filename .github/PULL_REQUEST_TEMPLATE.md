@@ -13,6 +13,7 @@
 - [ ] `npm run typecheck` passes
 - [ ] `npm run lint` passes
 - [ ] `npm run build` succeeds
+- [ ] `npm test` passes (or N/A with reason)
 - [ ] Manual test: [describe what you tested]
 
 ## Notes for reviewers

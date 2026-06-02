@@ -31,11 +31,15 @@ recmp3 prompt standup.wav --template claude-code | pbcopy
 ## Installation
 
 ```bash
+npm install -g recmp3-cli
+```
+
+Or build from source:
+
+```bash
 git clone https://github.com/aedneth/recmp3-cli
 cd recmp3-cli
-npm install
-npm run build
-npm link
+npm install && npm run build && npm link
 ```
 
 Then set your API key:
@@ -209,6 +213,16 @@ Environment variables override config file values:
 
 Audio is captured as WAV 16kHz mono (~1 MB/min), so the 25 MB limit covers ~25 minutes per recording. Longer recordings are chunked automatically.
 
+## Roadmap
+
+| Version | Theme | Status |
+|---|---|---|
+| v0.1.0 | Core TUI recorder + Groq/OpenAI transcription | ✅ shipped |
+| v0.2.0 | Agent-native: `--json`, MCP server, local Whisper, keychain | ✅ shipped |
+| v0.3.0 | Streaming transcription, real-time waveform display | planned |
+| v0.4.0 | Multi-segment smart chunking, speaker diarization | planned |
+| v1.0.0 | API stability guarantee, plugin SDK | planned |
+
 ## Development
 
 ```bash
@@ -216,9 +230,11 @@ npm run dev           # Run with tsx (no build step)
 npm run build         # Build to dist/
 npm run typecheck     # TypeScript check
 npm run lint          # Biome lint
-npm test              # Run test suite
+npm test              # Run test suite (vitest)
 npm run test:watch    # Watch mode
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contribution guide.
 
 ## License
 

@@ -26,8 +26,9 @@ Open a GitHub Issue using the feature request template. Describe the use case, n
    npm run typecheck
    npm run lint
    npm run build
+   npm test
    ```
-5. Open a pull request against `main`
+5. Open a pull request against `master`
 
 ## Development setup
 
@@ -38,10 +39,15 @@ npm install
 npm run dev        # Run without building (tsx)
 npm run build      # Build to dist/
 npm run typecheck  # TypeScript check
-npm run lint       # Biome lint
+npm run lint       # Biome lint + format check
+npm test           # Run vitest suite
 ```
 
 **Requirements:** Node.js ≥ 20, ffmpeg ≥ 4.4, a Groq API key (`GROQ_API_KEY` env var).
+
+## Commit convention
+
+Use [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `docs:`, `chore:`, `test:`, `refactor:`. The CI does not enforce this but it keeps the history readable.
 
 ## Code style
 

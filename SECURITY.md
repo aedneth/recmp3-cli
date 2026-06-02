@@ -4,13 +4,16 @@
 
 | Version | Supported |
 |---------|-----------|
+| 0.2.x   | ✅        |
 | 0.1.x   | ✅        |
 
 ## Reporting a vulnerability
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Email: **eduardoa.borjas@gmail.com**
+Preferred: [GitHub private security advisory](https://github.com/aedneth/recmp3-cli/security/advisories/new)
+
+Or email: **eduardoa.borjas@gmail.com**
 
 Include:
 - Description of the vulnerability
