@@ -5,23 +5,37 @@ on:
     tags:
       - 'v*'
 
+permissions: {}
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      id-token: write
+      contents: write   # create GitHub Release
+      id-token: write   # OIDC — enables npm --provenance attestation
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4.4.0
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
+          cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      # Zero-trust install — no postinstall scripts from any package.
+      - name: Install dependencies (zero-trust)
+        run: npm ci --ignore-scripts
+
+      - name: Rebuild trusted native modules
+        run: npm rebuild keytar 2>/dev/null || true
+        env:
+          npm_config_ignore_scripts: 'false'
+
+      # Release gate: no HIGH/CRITICAL vulnerabilities allowed to ship.
+      - name: Dependency security audit
+        run: npm audit --audit-level=high
 
       - name: Type check
         run: npm run typecheck
@@ -33,11 +47,15 @@ jobs:
         run: npm run build
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2
         with:
           generate_release_notes: true
 
+      # --provenance: generates a signed SLSA attestation linking this package
+      # to the specific GitHub Actions run that built it. Verifiable via:
+      #   npm audit signatures recmp3-cli@<version>
+      # --ignore-scripts: prevents prepublishOnly from running (build already done above).
       - name: Publish to npm
-        run: npm publish --provenance --access public
+        run: npm publish --provenance --access public --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
