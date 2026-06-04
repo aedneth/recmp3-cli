@@ -1,6 +1,6 @@
 {
   "name": "recmp3-cli",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Record audio, transcribe with AI, output developer-ready prompts — for humans and AI agents, from a single terminal command.",
   "type": "module",
   "bin": {
@@ -41,6 +41,7 @@
     "@biomejs/biome": "^1.9.3",
     "@types/node": "^20.16.11",
     "@types/react": "^18.3.11",
+    "@vitest/coverage-v8": "4.1.8",
     "msw": "^2.4.9",
     "tsup": "^8.3.0",
     "tsx": "^4.19.1",

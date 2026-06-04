@@ -105,6 +105,10 @@ export async function runMcpServer(): Promise<void> {
       transcribe: z.boolean().optional(),
       provider: z.string().optional(),
       lang: z.string().optional(),
+      source: z
+        .string()
+        .optional()
+        .describe('Audio source id, or "auto" for the best physical mic'),
     },
     (a, ctx) =>
       runRecord(
@@ -115,10 +119,30 @@ export async function runMcpServer(): Promise<void> {
           transcribe: a.transcribe as boolean,
           provider: a.provider as string,
           lang: a.lang as string,
+          source: a.source as string,
         },
         ctx
       )
   );
+
+  // Graceful shutdown: close the transport/server on termination signals and
+  // when the host disconnects (stdin EOF) so the process never lingers. Handlers
+  // are registered before connect() because connect() does not resolve until the
+  // session ends — anything after it would never run while the server is live.
+  let closing = false;
+  const shutdown = async () => {
+    if (closing) return;
+    closing = true;
+    try {
+      await server.close();
+    } catch {
+      // best-effort; we're exiting regardless
+    }
+    process.exit(0);
+  };
+  process.once('SIGTERM', shutdown);
+  process.once('SIGINT', shutdown);
+  process.stdin.once('end', shutdown);
 
   const transport = new StdioServerTransport();
   await server.connect(transport);

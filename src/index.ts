@@ -19,7 +19,7 @@ import { runTranscribe } from './commands/transcribe.js';
 import { ExitCode, RecmpError } from './errors.js';
 import { initLogger } from './log.js';
 
-const VERSION = '0.2.0';
+const VERSION = '1.0.0';
 
 const program = new Command();
 
@@ -67,6 +67,10 @@ program
     'Override transcription provider (groq, openai, local-whisper)'
   )
   .option('--lang <code>', 'Force language code (e.g. es, en)')
+  .option(
+    '--source <id>',
+    'Audio source id, or "auto" to pick the best physical mic'
+  )
   .option(
     '--duration <seconds>',
     'Headless: record for N seconds then stop (no TUI)'

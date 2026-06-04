@@ -2,6 +2,24 @@
 
 All notable changes are documented here. This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/).
 
+## [1.0.0] — 2026-06-03
+
+First stable release. The agent-native, local-first feature set introduced across 0.x is now considered complete and the CLI surface and exit-code contract are stable.
+
+### Added
+
+- **Source auto-detection** — `recmp3 record --source auto` (and `RECMP3_SOURCE=auto`) picks the best physical microphone, skipping the generic `default` alias and `.monitor` (system-audio loopback) sources.
+- `recmp3 sources` now marks the auto-detected microphone as `(recommended)` and reports it in the JSON envelope as `recommended`.
+- `--source <id>` flag on `recmp3 record` (and a `source` argument on the `recmp3_record` MCP tool) to select a capture device explicitly.
+
+### Changed
+
+- The MCP server (`recmp3 mcp`) now shuts down gracefully on `SIGTERM`/`SIGINT` and on host disconnect (stdin EOF), closing the transport cleanly instead of being killed by the signal.
+
+### Tested
+
+- Expanded the unit suite to 84 tests, including the new source auto-detection logic, the `redactKey` secret-masking, the public error→exit-code contract, the `AgentContext` runtime, and the prompt templates. Added `@vitest/coverage-v8` for coverage reporting.
+
 ## [0.2.0] — 2026-06-02
 
 ### Added

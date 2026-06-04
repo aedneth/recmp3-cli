@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/aedneth/recmp3-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/aedneth/recmp3-cli/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![version](https://img.shields.io/badge/version-0.2.0-blue)](https://github.com/aedneth/recmp3-cli/releases)
+[![version](https://img.shields.io/badge/version-1.0.0-blue)](https://github.com/aedneth/recmp3-cli/releases)
 
 Record audio from any terminal, transcribe with Groq Whisper, get developer-ready output.
 A first-class tool for **both humans and terminal AI agents** — every interactive flow has a
@@ -63,14 +63,22 @@ recmp3 doctor
 recmp3 record [options]
 
 Options:
-  -n, --name <name>        Recording name (used in filename)
-  -s, --source <id>        Audio source ID (default: "default")
-  -o, --outdir <dir>       Output directory
-  -t, --template <name>    Prompt template to apply after transcription
-  --no-transcribe          Skip transcription step
-  --no-clipboard           Don't copy result to clipboard
+  -n, --name <name>        Output filename stem (e.g. "my-idea")
+  -o, --out <dir>          Output directory
+  -t, --transcribe         Transcribe immediately after recording
+  --mp3                    Save as MP3 instead of WAV
+  --provider <name>        Override provider (groq, openai, local-whisper)
+  --lang <code>            Force language code (e.g. es, en)
+  --source <id>            Audio source id, or "auto" for the best physical mic
+  --duration <seconds>     Headless: record N seconds then stop (no TUI)
+  --no-tui                 Force headless capture (record until Ctrl+C)
+  --no-copy / --no-print   Don't copy / don't print the transcript
   -y, --yes                Skip upload consent prompt
 ```
+
+> **Tip:** `recmp3 record --source auto` selects your real microphone automatically,
+> skipping the generic `default` device and system-audio `.monitor` sources.
+> Run `recmp3 sources` to see every device and which one is `(recommended)`.
 
 Controls while recording:
 - `p` or Space — pause / resume
@@ -219,9 +227,10 @@ Audio is captured as WAV 16kHz mono (~1 MB/min), so the 25 MB limit covers ~25 m
 |---|---|---|
 | v0.1.0 | Core TUI recorder + Groq/OpenAI transcription | ✅ shipped |
 | v0.2.0 | Agent-native: `--json`, MCP server, local Whisper, keychain | ✅ shipped |
-| v0.3.0 | Streaming transcription, real-time waveform display | planned |
-| v0.4.0 | Multi-segment smart chunking, speaker diarization | planned |
-| v1.0.0 | API stability guarantee, plugin SDK | planned |
+| v1.0.0 | Source auto-detection, graceful MCP shutdown, stable CLI + exit-code contract | ✅ shipped |
+| v1.1.0 | Streaming transcription, real-time waveform display | planned |
+| v1.2.0 | Multi-segment smart chunking, speaker diarization | planned |
+| v2.0.0 | Plugin SDK for custom providers and templates | planned |
 
 ## Development
 

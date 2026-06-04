@@ -1,5 +1,6 @@
 import pc from 'picocolors';
 import type { AgentContext } from '../agent/context.js';
+import { pickAutoSource } from '../audio/auto-source.js';
 import { getAudioFactory } from '../audio/capture.js';
 import type { AudioSource } from '../audio/types.js';
 import { RecmpError } from '../errors.js';
@@ -21,8 +22,9 @@ export async function runSources(ctx: AgentContext): Promise<void> {
   }
 
   const platform = process.platform;
+  const recommended = sources.length ? pickAutoSource(sources) : 'default';
 
-  ctx.ok('sources', { platform, sources }, () => {
+  ctx.ok('sources', { platform, sources, recommended }, () => {
     const platformLabels: Record<string, string> = {
       linux: 'Linux (PulseAudio/PipeWire)',
       darwin: 'macOS (AVFoundation)',
@@ -40,14 +42,20 @@ export async function runSources(ctx: AgentContext): Promise<void> {
     }
 
     for (const source of sources) {
-      const marker = source.isDefault ? pc.green(' (default)') : '';
+      const markers = [
+        source.isDefault ? pc.green(' (default)') : '',
+        source.id === recommended ? pc.yellow(' (recommended)') : '',
+      ].join('');
       const id = pc.cyan(source.id);
       const label =
         source.label !== source.id ? pc.gray(` — ${source.label}`) : '';
-      console.log(`  ${id}${label}${marker}`);
+      console.log(`  ${id}${label}${markers}`);
     }
 
-    console.log(`\n${pc.gray('  Use with: recmp3 record --source <id>')}`);
+    console.log(
+      `\n${pc.gray('  Best mic:')} ${pc.cyan('recmp3 record --source auto')}`
+    );
+    console.log(`${pc.gray('  Specific:')} recmp3 record --source <id>`);
     console.log(
       pc.gray('  Or set:   RECMP3_SOURCE=<id> in your environment\n')
     );

@@ -4,7 +4,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import pc from 'picocolors';
 import type { AgentContext } from '../agent/context.js';
+import { pickAutoSource } from '../audio/auto-source.js';
 import { getAudioFactory } from '../audio/capture.js';
+import type { AudioCaptureFactory } from '../audio/types.js';
 import { loadConfig } from '../config/load.js';
 import type { RecmpConfig } from '../config/schema.js';
 import { ensureUploadConsent } from '../consent.js';
@@ -23,10 +25,27 @@ export interface RecordOptions {
   mp3?: boolean;
   provider?: string;
   lang?: string;
+  source?: string;
   duration?: string;
   tui?: boolean; // commander sets false for --no-tui
   copy?: boolean;
   print?: boolean;
+}
+
+/**
+ * Resolve the capture source. Precedence: --source flag → config.audio.source
+ * (which env RECMP3_SOURCE may have overridden). The literal "auto" triggers
+ * physical-mic auto-detection via the factory's source list.
+ */
+async function resolveSource(
+  opts: RecordOptions,
+  config: RecmpConfig,
+  factory: AudioCaptureFactory
+): Promise<string> {
+  const requested = opts.source ?? config.audio.source;
+  if (requested !== 'auto') return requested;
+  const sources = await factory.listSources();
+  return pickAutoSource(sources);
 }
 
 interface TranscriptionPayload {
@@ -83,7 +102,7 @@ async function recordHeadless(
 
   const factory = await getAudioFactory();
   const capture = factory.create();
-  const source = config.audio.source;
+  const source = await resolveSource(opts, config, factory);
 
   try {
     await capture.start({
@@ -168,7 +187,7 @@ async function recordTui(
 
   const factory = await getAudioFactory();
   const capture = factory.create();
-  const source = config.audio.source;
+  const source = await resolveSource(opts, config, factory);
 
   const firstSegPath = join(tmpDir, 'segment-0001.wav');
   try {

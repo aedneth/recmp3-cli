@@ -59,7 +59,7 @@ const GLOBAL_FLAGS: ManifestFlag[] = [
 
 export const MANIFEST: Manifest = {
   name: 'recmp3',
-  version: '0.2.0',
+  version: '1.0.0',
   description:
     'Record audio, transcribe with AI, output developer-ready prompts.',
   globalFlags: GLOBAL_FLAGS,
@@ -202,6 +202,11 @@ export const MANIFEST: Manifest = {
           description: 'groq | openai | local-whisper',
         },
         { name: '--lang', type: 'string', description: 'Force language code' },
+        {
+          name: '--source',
+          type: 'string',
+          description: 'Audio source id, or "auto" for the best physical mic',
+        },
       ],
       stdin: false,
       stdout: 'json',
