@@ -29,6 +29,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Rebuild trusted native modules
+        shell: bash   # bash-isms (2>/dev/null, || true) — portable across runners
         run: npm rebuild keytar 2>/dev/null || true
         env:
           npm_config_ignore_scripts: 'false'

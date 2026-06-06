@@ -39,6 +39,7 @@ jobs:
       # Explicit whitelist: only named, reviewed native modules may compile.
       # keytar: OS keychain bindings — source-available, required for API key storage.
       - name: Rebuild trusted native modules
+        shell: bash   # bash-isms (2>/dev/null, || true) — Windows defaults to pwsh
         run: npm rebuild keytar 2>/dev/null || true
         env:
           npm_config_ignore_scripts: 'false'
